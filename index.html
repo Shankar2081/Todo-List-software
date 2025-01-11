@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do Software</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .todo-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border: 1px solid #e3e3e3;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #ffffff;
+        }
+        .task-item.completed {
+            text-decoration: line-through;
+            background-color: #d1e7dd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container todo-container">
+        <h2 class="text-center mb-4">To-Do List</h2>
+        <form id="taskForm" class="mb-3">
+            <div class="input-group">
+                <input type="text" id="taskInput" class="form-control" placeholder="Add a new task" required>
+                <button type="submit" class="btn btn-primary">Add Task</button>
+            </div>
+        </form>
+
+        <div id="tasksList"></div>
+    </div>
+
+    <script>
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = '';
+
+            tasks.forEach((task, index) => {
+                const taskItem = document.createElement('div');
+                taskItem.classList.add('task-item');
+                if (task.completed) taskItem.classList.add('completed');
+
+                taskItem.innerHTML = `
+                    <span>${task.text}</span>
+                    <div>
+                        <button class="btn btn-success btn-sm me-2" onclick="markCompleted(${index})">${task.completed ? 'Undo' : 'Complete'}</button>
+                        <button class="btn btn-warning btn-sm me-2" onclick="editTask(${index})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTask(${index})">Delete</button>
+                    </div>
+                `;
+
+                tasksList.appendChild(taskItem);
+            });
+
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function addTask(taskText) {
+            tasks.push({ text: taskText, completed: false });
+            renderTasks();
+        }
+
+        function markCompleted(index) {
+            tasks[index].completed = !tasks[index].completed;
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            renderTasks();
+        }
+
+        function editTask(index) {
+            const newTaskText = prompt('Edit your task:', tasks[index].text);
+            if (newTaskText) {
+                tasks[index].text = newTaskText;
+                renderTasks();
+            }
+        }
+
+        document.getElementById('taskForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const taskInput = document.getElementById('taskInput');
+            if (taskInput.value.trim() !== '') {
+                addTask(taskInput.value.trim());
+                taskInput.value = '';
+            }
+        });
+
+        renderTasks();
+    </script>
+</body>
+</html>
